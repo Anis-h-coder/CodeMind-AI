@@ -1,0 +1,8 @@
+{
+  "name": "Remix CodeMind AI",
+  "description": "AI-Powered Codebase \u0026 Knowledge Intelligence Platform providing codebase exploration, RAG-based code assistance, SQL Copilot, and LLM diagnostics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,10 +1,10 @@
-import { db } from '../db/index.ts';
-import { projects, repositories, files, documentChunks, evaluations } from '../db/schema.ts';
+import { db } from '../db/index';
+import { projects, repositories, files, documentChunks, evaluations } from '../db/schema';
 import { eq, and, sql, desc } from 'drizzle-orm';
-import { generateEmbedding, generateAnswer, getGeminiClient, retryWithBackoff } from './geminiService.ts';
-import { performHybridRetrieval } from './hybridRetrievalService.ts';
-import { searchSimilarChunks } from './vectorSearchService.ts';
-import { evaluateWithJudge, JudgeResult } from './evaluationJudgeService.ts';
+import { generateEmbedding, generateAnswer, getGeminiClient, retryWithBackoff } from './geminiService';
+import { performHybridRetrieval } from './hybridRetrievalService';
+import { searchSimilarChunks } from './vectorSearchService';
+import { evaluateWithJudge, JudgeResult } from './evaluationJudgeService';
 import { Type } from '@google/genai';
 
 // Definition of standard evaluation questions and their golden/expected search pattern.

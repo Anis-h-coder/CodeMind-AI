@@ -1,9 +1,9 @@
-import { db } from '../db/index.ts';
-import { files, documentChunks, repositories } from '../db/schema.ts';
+import { db } from '../db/index';
+import { files, documentChunks, repositories } from '../db/schema';
 import { eq } from 'drizzle-orm';
-import { chunkFile } from './codeChunker.ts';
-import { generateEmbeddingsBatch } from './geminiService.ts';
-import { shouldIndexFile } from '../utils/fileFilter.ts';
+import { chunkFile } from './codeChunker';
+import { generateEmbeddingsBatch } from './geminiService';
+import { shouldIndexFile } from '../utils/fileFilter';
 
 /**
  * Generates and stores embeddings for all files belonging to a project.

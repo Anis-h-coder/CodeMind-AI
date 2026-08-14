@@ -1,9 +1,9 @@
 import { GoogleGenAI } from "@google/genai";
-import { getCompactSchemaContext } from './schemaService.ts';
-import { validateSql } from './sqlValidator.ts';
-import { executeReadOnlySql, SqlExecutionResult } from './sqlExecutionService.ts';
-import { db } from '../db/index.ts';
-import { sqlQueries } from '../db/schema.ts';
+import { getCompactSchemaContext } from './schemaService';
+import { validateSql } from './sqlValidator';
+import { executeReadOnlySql, SqlExecutionResult } from './sqlExecutionService';
+import { db } from '../db/index';
+import { sqlQueries } from '../db/schema';
 
 let aiClient: GoogleGenAI | null = null;
 

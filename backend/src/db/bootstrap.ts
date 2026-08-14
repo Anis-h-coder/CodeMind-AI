@@ -1,4 +1,4 @@
-import { createPool } from './index.ts';
+import { createPool } from './index';
 
 let isInitialized = false;
 

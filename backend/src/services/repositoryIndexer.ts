@@ -1,10 +1,10 @@
-import { db } from '../db/index.ts';
-import { repositories, files } from '../db/schema.ts';
+import { db } from '../db/index';
+import { repositories, files } from '../db/schema';
 import { eq } from 'drizzle-orm';
-import * as githubService from './githubService.ts';
-import { shouldIndexFile, getLanguageFromFilePath } from '../utils/fileFilter.ts';
+import * as githubService from './githubService';
+import { shouldIndexFile, getLanguageFromFilePath } from '../utils/fileFilter';
 import path from 'path';
-import { indexProjectEmbeddings } from './embeddingService.ts';
+import { indexProjectEmbeddings } from './embeddingService';
 
 /**
  * Checks if content is likely a binary file.

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { projectController } from '../controllers/projectController';
-import { evaluationController } from '../controllers/evaluationController.ts';
+import { evaluationController } from '../controllers/evaluationController';
 import { authMiddleware } from '../middleware/authMiddleware';
 
 const router = Router();

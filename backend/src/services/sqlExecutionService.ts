@@ -1,4 +1,4 @@
-import { pool } from '../db/index.ts';
+import { pool } from '../db/index';
 
 export interface SqlExecutionResult {
   columns: string[];

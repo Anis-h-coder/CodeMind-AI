@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { db } from '../db/index.ts';
+import { db } from '../db/index';
 
 export interface SimilarChunkResult {
   content: string;

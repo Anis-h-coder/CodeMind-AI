@@ -1,8 +1,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import authRoutes from '../backend/src/routes/authRoutes.ts';
-import projectRoutes from '../backend/src/routes/projectRoutes.ts';
-import conversationRoutes from '../backend/src/routes/conversationRoutes.ts';
+import authRoutes from '../backend/src/routes/authRoutes';
+import projectRoutes from '../backend/src/routes/projectRoutes';
+import conversationRoutes from '../backend/src/routes/conversationRoutes';
 
 dotenv.config();
 

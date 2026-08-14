@@ -44,7 +44,7 @@ export async function request<T>(endpoint: string, options: RequestInit = {}): P
         throw new Error(`API endpoint not found (HTTP 404). Check if the Vercel backend serverless function is configured or DATABASE_URL / environment variables are set.`);
       }
       if (response.status === 500) {
-        throw new Error(`Database connection failed on server (HTTP 500). Please ensure DATABASE_URL is set in Vercel Environment Variables.`);
+        throw new Error(`Server function error (HTTP 500). Check Vercel Functions Log for exact details.`);
       }
       throw new Error(`Backend server error (HTTP ${response.status} ${response.statusText || 'Server Error'}). Check Vercel logs.`);
     }

@@ -1,14 +1,14 @@
 import { Request, Response } from 'express';
-import { db } from '../db/index.ts';
-import { projects, repositories, files, documentChunks, sqlQueries, evaluations, conversations, messages } from '../db/schema.ts';
+import { db } from '../db/index';
+import { projects, repositories, files, documentChunks, sqlQueries, evaluations, conversations, messages } from '../db/schema';
 import { eq, and, sql, desc } from 'drizzle-orm';
-import * as githubService from '../services/githubService.ts';
-import * as repositoryIndexer from '../services/repositoryIndexer.ts';
-import { generateEmbedding, generateAnswer } from '../services/geminiService.ts';
-import { searchSimilarChunks } from '../services/vectorSearchService.ts';
-import { performHybridRetrieval } from '../services/hybridRetrievalService.ts';
-import { processNaturalLanguageQuery, explainSql } from '../services/sqlCopilotService.ts';
-import { discoverSchema } from '../services/schemaService.ts';
+import * as githubService from '../services/githubService';
+import * as repositoryIndexer from '../services/repositoryIndexer';
+import { generateEmbedding, generateAnswer } from '../services/geminiService';
+import { searchSimilarChunks } from '../services/vectorSearchService';
+import { performHybridRetrieval } from '../services/hybridRetrievalService';
+import { processNaturalLanguageQuery, explainSql } from '../services/sqlCopilotService';
+import { discoverSchema } from '../services/schemaService';
 
 // Helper to fetch/calculate stats for a single project from database
 async function getProjectStats(projectId: string) {

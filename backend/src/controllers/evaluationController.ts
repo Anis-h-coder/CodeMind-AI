@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import { db } from '../db/index.ts';
-import { projects } from '../db/schema.ts';
+import { db } from '../db/index';
+import { projects } from '../db/schema';
 import { eq, and } from 'drizzle-orm';
-import * as evaluationService from '../services/evaluationService.ts';
+import * as evaluationService from '../services/evaluationService';
 
 /**
  * Controller to manage LLM Evaluation Suite endpoints.

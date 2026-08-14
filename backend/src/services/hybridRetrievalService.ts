@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
-import { db } from '../db/index.ts';
-import { SimilarChunkResult } from './vectorSearchService.ts';
+import { db } from '../db/index';
+import { SimilarChunkResult } from './vectorSearchService';
 
 export interface HybridRetrievalOptions {
   projectId: string;

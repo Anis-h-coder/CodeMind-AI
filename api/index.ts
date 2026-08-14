@@ -9,8 +9,19 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-// API Route Declarations
-app.get('/api/health', (req, res) => {
+// Enable CORS
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
+
+// API Route Declarations (support both /api/ prefix and stripped routes)
+app.get(['/api/health', '/health'], (req, res) => {
   res.json({ 
     status: 'healthy', 
     platform: 'CodeMind AI Core', 
@@ -19,8 +30,13 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
+
 app.use('/api/projects', projectRoutes);
+app.use('/projects', projectRoutes);
+
 app.use('/api/conversations', conversationRoutes);
+app.use('/conversations', conversationRoutes);
 
 // Global Error Handler for Vercel Serverless Functions
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

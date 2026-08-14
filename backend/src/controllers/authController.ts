@@ -27,22 +27,41 @@ export const authController = {
       const isDemoAccount = normalizedEmail.includes('demo') || normalizedEmail === 'demo.developer@codemind.ai';
 
       let userRecord: any = null;
-      try {
-        await ensureDatabaseSchema();
-        const results = await db.select().from(users).where(eq(users.email, normalizedEmail));
-        userRecord = results[0];
-      } catch (dbErr: any) {
-        console.error('[CodeMind Auth] Database query failed:', dbErr?.message);
-        if (isDemoAccount) {
-          console.log('[CodeMind Auth] Demo account login requested - using fallback demo user record.');
-          userRecord = {
-            id: '11111111-2222-3333-4444-555555555555',
-            email: normalizedEmail,
-            name: 'Demo Developer',
-            passwordHash: '$2b$10$abcdefghijklmnopqrstuu',
-            createdAt: new Date(),
-          };
-        } else {
+
+      if (isDemoAccount) {
+        console.log('[CodeMind Auth] Demo login requested - creating instant demo session.');
+        userRecord = {
+          id: '11111111-2222-3333-4444-555555555555',
+          email: normalizedEmail,
+          name: 'Demo Developer',
+          passwordHash: '$2b$10$abcdefghijklmnopqrstuu',
+          createdAt: new Date(),
+        };
+
+        // Try syncing demo user to database in background
+        ensureDatabaseSchema().then(async () => {
+          try {
+            const results = await db.select().from(users).where(eq(users.email, normalizedEmail));
+            if (!results[0]) {
+              const hashedPassword = await bcrypt.hash(password || 'password123', 10);
+              await db.insert(users).values({
+                id: '11111111-2222-3333-4444-555555555555',
+                name: 'Demo Developer',
+                email: normalizedEmail,
+                passwordHash: hashedPassword,
+              });
+            }
+          } catch (err: any) {
+            // Non-blocking background sync warning
+          }
+        }).catch(() => {});
+      } else {
+        try {
+          await ensureDatabaseSchema();
+          const results = await db.select().from(users).where(eq(users.email, normalizedEmail));
+          userRecord = results[0];
+        } catch (dbErr: any) {
+          console.error('[CodeMind Auth] Database query failed:', dbErr?.message);
           return res.status(500).json({
             success: false,
             error: {

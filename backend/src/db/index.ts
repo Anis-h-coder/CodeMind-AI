@@ -11,7 +11,11 @@ declare global {
 
 export const createPool = () => {
   if (!global._postgresPool) {
-    const connectionString = process.env.DATABASE_URL;
+    let connectionString = (process.env.DATABASE_URL || '').trim();
+    if ((connectionString.startsWith('"') && connectionString.endsWith('"')) || 
+        (connectionString.startsWith("'") && connectionString.endsWith("'"))) {
+      connectionString = connectionString.slice(1, -1).trim();
+    }
     
     if (connectionString) {
       console.log('[CodeMind DB] Initializing connection pool with DATABASE_URL...');
@@ -21,35 +25,60 @@ export const createPool = () => {
                        connectionString.includes('render.com') ||
                        connectionString.includes('aiven') ||
                        process.env.NODE_ENV === 'production';
-      global._postgresPool = new Pool({
-        connectionString,
-        max: 10,
-        connectionTimeoutMillis: 15000,
-        ...(needsSsl ? { ssl: { rejectUnauthorized: false } } : {}),
-      });
+      try {
+        const poolInstance = new Pool({
+          connectionString,
+          max: 5,
+          connectionTimeoutMillis: 10000,
+          idleTimeoutMillis: 30000,
+          ...(needsSsl ? { ssl: { rejectUnauthorized: false } } : {}),
+        });
+
+        // Register error handler immediately on pool creation to avoid process crash
+        poolInstance.on('error', (err) => {
+          console.error('[CodeMind DB] Idle pool background error:', err?.message || err);
+        });
+
+        global._postgresPool = poolInstance;
+      } catch (err) {
+        console.error('[CodeMind DB] Exception initializing Pool:', err);
+      }
     } else if (process.env.SQL_HOST) {
       console.log('[CodeMind DB] DATABASE_URL not found. Falling back to SQL_* environment variables...');
-      global._postgresPool = new Pool({
-        host: process.env.SQL_HOST,
-        user: process.env.SQL_USER,
-        password: process.env.SQL_PASSWORD,
-        database: process.env.SQL_DB_NAME,
-        max: 10,
-        connectionTimeoutMillis: 15000,
-      });
-    } else {
-      console.warn('[CodeMind DB] WARNING: No database credentials (DATABASE_URL or SQL_*) found in environment.');
-      // Create a dummy pool that will fail lazily on query invocation instead of crashing the server on startup
-      global._postgresPool = new Pool({
-        max: 1,
-        connectionTimeoutMillis: 1000,
-      });
+      try {
+        const poolInstance = new Pool({
+          host: process.env.SQL_HOST,
+          user: process.env.SQL_USER,
+          password: process.env.SQL_PASSWORD,
+          database: process.env.SQL_DB_NAME,
+          max: 5,
+          connectionTimeoutMillis: 10000,
+          idleTimeoutMillis: 30000,
+        });
+
+        poolInstance.on('error', (err) => {
+          console.error('[CodeMind DB] Idle pool background error:', err?.message || err);
+        });
+
+        global._postgresPool = poolInstance;
+      } catch (err) {
+        console.error('[CodeMind DB] Exception initializing SQL_* Pool:', err);
+      }
     }
 
-    // Guard against idle client errors
-    global._postgresPool.on('error', (err) => {
-      console.error('[CodeMind DB] Unexpected error on idle SQL pool client:', err);
-    });
+    if (!global._postgresPool) {
+      console.warn('[CodeMind DB] WARNING: No database credentials found. Operating in safe fallback mode.');
+      // Create a dummy pool with immediate error handler to prevent unhandled 'error' events
+      const dummyPool = new Pool({
+        host: '127.0.0.1',
+        port: 54321,
+        connectionTimeoutMillis: 1000,
+      });
+      dummyPool.on('error', () => {
+        // Prevent uncaught error event from crashing Node process
+      });
+      global._postgresPool = dummyPool;
+    }
   }
   return global._postgresPool;
 };

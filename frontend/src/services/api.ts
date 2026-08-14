@@ -15,25 +15,52 @@ function getHeaders() {
 
 export async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE}${endpoint}`;
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      ...getHeaders(),
-      ...options.headers,
-    },
-  });
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers: {
+        ...getHeaders(),
+        ...options.headers,
+      },
+    });
+  } catch (netErr: any) {
+    throw new Error(`Connection error: Unable to reach the backend API server (${netErr.message || 'Network failure'}).`);
+  }
 
-  const data = await response.json();
+  const contentType = response.headers.get('content-type') || '';
+  let data: any = {};
+
+  if (contentType.includes('application/json')) {
+    try {
+      data = await response.json();
+    } catch {
+      data = {};
+    }
+  } else {
+    const rawText = await response.text();
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error(`API endpoint not found (HTTP 404). Check if the Vercel backend serverless function is configured or DATABASE_URL / environment variables are set.`);
+      }
+      throw new Error(`Backend server error (HTTP ${response.status} ${response.statusText}).`);
+    }
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      throw new Error(`Unexpected non-JSON response from server.`);
+    }
+  }
 
   if (!response.ok) {
     if (response.status === 401) {
       localStorage.removeItem('codemind_token');
       localStorage.removeItem('codemind_user');
     }
-    const errPayload = typeof data.error === 'object' ? (data.error?.message || JSON.stringify(data.error)) : data.error;
-    const errMsg = errPayload || data.message || 'Something went wrong';
+    const errPayload = typeof data?.error === 'object' ? (data.error?.message || JSON.stringify(data.error)) : data?.error;
+    const errMsg = errPayload || data?.message || `Request failed with status ${response.status}`;
     const err = new Error(errMsg);
-    if (data.stage) (err as any).stage = data.stage;
+    if (data?.stage) (err as any).stage = data.stage;
     throw err;
   }
 

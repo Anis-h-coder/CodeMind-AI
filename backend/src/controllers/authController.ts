@@ -37,24 +37,6 @@ export const authController = {
           passwordHash: '$2b$10$abcdefghijklmnopqrstuu',
           createdAt: new Date(),
         };
-
-        // Try syncing demo user to database in background
-        ensureDatabaseSchema().then(async () => {
-          try {
-            const results = await db.select().from(users).where(eq(users.email, normalizedEmail));
-            if (!results[0]) {
-              const hashedPassword = await bcrypt.hash(password || 'password123', 10);
-              await db.insert(users).values({
-                id: '11111111-2222-3333-4444-555555555555',
-                name: 'Demo Developer',
-                email: normalizedEmail,
-                passwordHash: hashedPassword,
-              });
-            }
-          } catch (err: any) {
-            // Non-blocking background sync warning
-          }
-        }).catch(() => {});
       } else {
         try {
           await ensureDatabaseSchema();
@@ -69,21 +51,6 @@ export const authController = {
               message: `Database connection error: ${dbErr?.message || 'Could not reach PostgreSQL'}. Check DATABASE_URL in Vercel settings.`
             }
           });
-        }
-      }
-
-      // Auto-provision Demo Developer Account if not existing
-      if (!userRecord && (normalizedEmail.includes('demo') || normalizedEmail === 'demo.developer@codemind.ai')) {
-        try {
-          const hashedPassword = await bcrypt.hash(password || 'password123', 10);
-          const [createdDemoUser] = await db.insert(users).values({
-            name: 'Demo Developer',
-            email: normalizedEmail,
-            passwordHash: hashedPassword,
-          }).returning();
-          userRecord = createdDemoUser;
-        } catch (demoCreateErr: any) {
-          console.warn('[CodeMind Auth] Demo user auto-creation warning:', demoCreateErr?.message);
         }
       }
 

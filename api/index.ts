@@ -20,8 +20,14 @@ app.use((req, res, next) => {
   next();
 });
 
+// Middleware to normalize URL paths for Vercel rewrites
+app.use((req, res, next) => {
+  console.log(`[CodeMind API] Request: ${req.method} ${req.url}`);
+  next();
+});
+
 // API Route Declarations (support both /api/ prefix and stripped routes)
-app.get(['/api/health', '/health'], (req, res) => {
+app.get(['/api/health', '/health', '/api', '/'], (req, res) => {
   res.json({ 
     status: 'healthy', 
     platform: 'CodeMind AI Core', 
@@ -38,6 +44,18 @@ app.use('/projects', projectRoutes);
 app.use('/api/conversations', conversationRoutes);
 app.use('/conversations', conversationRoutes);
 
+// Catch-all 404 handler for API routes
+app.use((req, res) => {
+  console.warn(`[CodeMind API] Unmatched route: ${req.method} ${req.url}`);
+  res.status(404).json({
+    success: false,
+    error: {
+      code: 'NOT_FOUND',
+      message: `API endpoint ${req.method} ${req.url} not found.`
+    }
+  });
+});
+
 // Global Error Handler for Vercel Serverless Functions
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('[CodeMind API Error]:', err);
@@ -45,9 +63,11 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
     success: false,
     error: {
       code: 'SERVER_ERROR',
-      message: err.message || 'Database connection or server error occurred on Vercel.'
+      message: err?.message || 'Database connection or server error occurred on Vercel.'
     }
   });
 });
 
-export default app;
+export default function handler(req: any, res: any) {
+  return app(req, res);
+}

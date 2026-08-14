@@ -1,4 +1,4 @@
-import { getGeminiClient } from './geminiService.ts';
+import { getGeminiClient } from './geminiService';
 import { Type } from '@google/genai';
 
 export interface JudgeInput {

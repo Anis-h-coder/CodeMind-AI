@@ -68,6 +68,4 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   });
 });
 
-export default function handler(req: any, res: any) {
-  return app(req, res);
-}
+export default app;

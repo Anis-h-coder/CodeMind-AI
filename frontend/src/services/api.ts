@@ -43,7 +43,10 @@ export async function request<T>(endpoint: string, options: RequestInit = {}): P
       if (response.status === 404) {
         throw new Error(`API endpoint not found (HTTP 404). Check if the Vercel backend serverless function is configured or DATABASE_URL / environment variables are set.`);
       }
-      throw new Error(`Backend server error (HTTP ${response.status} ${response.statusText}).`);
+      if (response.status === 500) {
+        throw new Error(`Database connection failed on server (HTTP 500). Please ensure DATABASE_URL is set in Vercel Environment Variables.`);
+      }
+      throw new Error(`Backend server error (HTTP ${response.status} ${response.statusText || 'Server Error'}). Check Vercel logs.`);
     }
     try {
       data = JSON.parse(rawText);
@@ -58,7 +61,7 @@ export async function request<T>(endpoint: string, options: RequestInit = {}): P
       localStorage.removeItem('codemind_user');
     }
     const errPayload = typeof data?.error === 'object' ? (data.error?.message || JSON.stringify(data.error)) : data?.error;
-    const errMsg = errPayload || data?.message || `Request failed with status ${response.status}`;
+    const errMsg = errPayload || data?.message || `Database or Server Error (${response.status}). Please verify DATABASE_URL in Vercel settings.`;
     const err = new Error(errMsg);
     if (data?.stage) (err as any).stage = data.stage;
     throw err;

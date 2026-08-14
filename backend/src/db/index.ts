@@ -15,10 +15,17 @@ export const createPool = () => {
     
     if (connectionString) {
       console.log('[CodeMind DB] Initializing connection pool with DATABASE_URL...');
+      const needsSsl = connectionString.includes('sslmode=') || 
+                       connectionString.includes('neon.tech') || 
+                       connectionString.includes('supabase') || 
+                       connectionString.includes('render.com') ||
+                       connectionString.includes('aiven') ||
+                       process.env.NODE_ENV === 'production';
       global._postgresPool = new Pool({
         connectionString,
         max: 10,
         connectionTimeoutMillis: 15000,
+        ...(needsSsl ? { ssl: { rejectUnauthorized: false } } : {}),
       });
     } else if (process.env.SQL_HOST) {
       console.log('[CodeMind DB] DATABASE_URL not found. Falling back to SQL_* environment variables...');

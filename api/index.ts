@@ -22,4 +22,16 @@ app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/conversations', conversationRoutes);
 
+// Global Error Handler for Vercel Serverless Functions
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('[CodeMind API Error]:', err);
+  res.status(500).json({
+    success: false,
+    error: {
+      code: 'SERVER_ERROR',
+      message: err.message || 'Database connection or server error occurred on Vercel.'
+    }
+  });
+});
+
 export default app;
